@@ -14,11 +14,11 @@ class MultiResViT(nn.Module):
                         heads = 3,
                         num_hierarchies = 2,        # number of hierarchies
                         block_repeats = (8, 4, 1),  # the number of transformer blocks at each heirarchy, starting from the bottom
-                        num_classes = 1
+                        num_classes = self.nclasses
                     )
     self.large = LeViT(
                         image_size = 224,
-                        num_classes = self.nclasses - 2,
+                        num_classes = self.nclasses,
                         stages = 3,             # number of stages
                         dim = (256, 384, 512),  # dimensions at each stage
                         depth = 3,              # transformer of depth 3 at each stage
