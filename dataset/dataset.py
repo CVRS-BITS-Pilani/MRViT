@@ -5,18 +5,19 @@ import h5py
 from medmnist.info import INFO
 import torchvision.transforms as transforms
 
-data_flag = 'retinamnist'
+data_flag = 'dermamnist'
 
 info = INFO[data_flag]
 task = info['task']
 
 class MyDataset(data.Dataset):
     """dataset class for returning both small and large images along with labels."""
-    def __init__(self, images_small, images_large, labels, transform=None):
+    def __init__(self, images_small, images_large, labels, small_transform=None, large_transform=None):
         self.images_small = images_small
         self.images_large = images_large
         self.labels = labels
-        self.transform = transform
+        self.small_transform = small_transform
+        self.large_transform = large_transform
 
     def __len__(self):
         return len(self.labels)
@@ -26,22 +27,12 @@ class MyDataset(data.Dataset):
         image_l = self.images_large[index].permute(2, 1, 0)
         label = torch.as_tensor(self.labels[index]).to(torch.int64)
 
-        if self.transform is not None:
-            image_s = self.transform(image_s)
-            image_l = self.transform(image_l)
+        if self.small_transform is not None:
+            image_s = self.small_transform(image_s)
+        if self.large_transform is not None:
+            image_l = self.large_transform(image_l)
 
         return image_s, image_l , label
-
-    def get_images(self):
-        images_s = self.images_small.permute(0, 3, 2, 1)
-        images_l = self.images_large
-        images_l = images_l.permute(0, 3, 2, 1)
-        if self.transform is not None:
-            for image in images_s[:]:
-                image = self.transform(image)
-            for image in images_l[:]:
-                image = self.transform(image)
-        return images_s, images_l
 
     def get_labels(self): 
         return self.labels.flatten()
@@ -61,7 +52,7 @@ def get_datasets():
         print(testl_data.shape, tests_data.shape, test_label.shape)
 
     train_size = len(trainl)
-    val_size = int(0.05 * train_size)
+    val_size = int(0.001 * train_size)
 
     rand_ind = np.random.randint(0, train_size, train_size)
 
@@ -76,18 +67,28 @@ def get_datasets():
     trains_data = trains[train_ind]
     vals_data = trains[val_ind]
 
-    train_transforms = transforms.Compose([
-        transforms.Normalize(mean=[.5], std=[.5]),
+    train_small_transforms = transforms.Compose([
+        transforms.Normalize(mean=[0.], std=[1.]),
         transforms.RandomHorizontalFlip(),
         transforms.RandomRotation(10),
+        transforms.Resize(224)
     ])
 
-    test_transforms = transforms.Compose([
-        transforms.Normalize(mean=[.5], std=[.5]),
+    train_large_transforms = transforms.Compose([
+        transforms.Normalize(mean=[0.], std=[1.]),
     ])
 
-    train_dataset = MyDataset(trains_data, trainl_data, train_label, transform = train_transforms)
-    valid_dataset = MyDataset(vals_data, vall_data, val_label, transform = test_transforms)
-    test_dataset = MyDataset(tests_data, testl_data, test_label, transform = test_transforms)
+    test_small_transforms = transforms.Compose([
+        transforms.Normalize(mean=[0.], std=[1.]),
+        transforms.Resize(224),
+    ])
+
+    test_large_transforms = transforms.Compose([
+        transforms.Normalize(mean=[0.], std=[1.]),
+    ])
+
+    train_dataset = MyDataset(trains_data, trainl_data, train_label, train_small_transforms, train_small_transforms)
+    valid_dataset = MyDataset(vals_data, vall_data, val_label, test_small_transforms, test_small_transforms)
+    test_dataset = MyDataset(tests_data, testl_data, test_label, test_small_transforms, test_small_transforms)
 
     return train_dataset, valid_dataset, test_dataset
