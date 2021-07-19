@@ -5,29 +5,29 @@ import h5py
 from medmnist.info import INFO
 import torchvision.transforms as transforms
 
-data_flag = 'pneumoniamnist'
+data_flag = 'retinamnist'
 
 info = INFO[data_flag]
 task = info['task']
 
 train_small_transforms = transforms.Compose([
-        transforms.Normalize(mean=[0.], std=[1.]),
+        transforms.Normalize(mean=[0.5], std=[0.5]),
         transforms.RandomHorizontalFlip(),
         transforms.RandomRotation(10),
-        transforms.Resize(224)
+        transforms.Resize(224),
     ])
 
 train_large_transforms = transforms.Compose([
-    transforms.Normalize(mean=[0.], std=[1.]),
+    transforms.Normalize(mean=[0.5], std=[0.5]),
 ])
 
 test_small_transforms = transforms.Compose([
-    transforms.Normalize(mean=[0.], std=[1.]),
+    transforms.Normalize(mean=[0.5], std=[0.5]),
     transforms.Resize(224),
 ])
 
 test_large_transforms = transforms.Compose([
-    transforms.Normalize(mean=[0.], std=[1.]),
+    transforms.Normalize(mean=[0.5], std=[0.5]),
 ])
 
 class MyDataset(data.Dataset):
