@@ -5,10 +5,30 @@ import h5py
 from medmnist.info import INFO
 import torchvision.transforms as transforms
 
-data_flag = 'dermamnist'
+data_flag = 'pneumoniamnist'
 
 info = INFO[data_flag]
 task = info['task']
+
+train_small_transforms = transforms.Compose([
+        transforms.Normalize(mean=[0.], std=[1.]),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomRotation(10),
+        transforms.Resize(224)
+    ])
+
+train_large_transforms = transforms.Compose([
+    transforms.Normalize(mean=[0.], std=[1.]),
+])
+
+test_small_transforms = transforms.Compose([
+    transforms.Normalize(mean=[0.], std=[1.]),
+    transforms.Resize(224),
+])
+
+test_large_transforms = transforms.Compose([
+    transforms.Normalize(mean=[0.], std=[1.]),
+])
 
 class MyDataset(data.Dataset):
     """dataset class for returning both small and large images along with labels."""
@@ -25,12 +45,16 @@ class MyDataset(data.Dataset):
     def __getitem__(self, index):
         image_s = self.images_small[index].permute(2, 1, 0)
         image_l = self.images_large[index].permute(2, 1, 0)
-        label = torch.as_tensor(self.labels[index]).to(torch.int64)
 
+        if image_s.size(0) == 1:
+            image_s = image_s.repeat(3, 1, 1)
+            image_l = image_l.repeat(3, 1, 1)
         if self.small_transform is not None:
             image_s = self.small_transform(image_s)
         if self.large_transform is not None:
             image_l = self.large_transform(image_l)
+
+        label = torch.as_tensor(self.labels[index]).to(torch.int64)
 
         return image_s, image_l , label
 
@@ -66,26 +90,6 @@ def get_datasets():
     vall_data = trainl[val_ind]
     trains_data = trains[train_ind]
     vals_data = trains[val_ind]
-
-    train_small_transforms = transforms.Compose([
-        transforms.Normalize(mean=[0.], std=[1.]),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomRotation(10),
-        transforms.Resize(224)
-    ])
-
-    train_large_transforms = transforms.Compose([
-        transforms.Normalize(mean=[0.], std=[1.]),
-    ])
-
-    test_small_transforms = transforms.Compose([
-        transforms.Normalize(mean=[0.], std=[1.]),
-        transforms.Resize(224),
-    ])
-
-    test_large_transforms = transforms.Compose([
-        transforms.Normalize(mean=[0.], std=[1.]),
-    ])
 
     train_dataset = MyDataset(trains_data, trainl_data, train_label, train_small_transforms, train_small_transforms)
     valid_dataset = MyDataset(vals_data, vall_data, val_label, test_small_transforms, test_small_transforms)
