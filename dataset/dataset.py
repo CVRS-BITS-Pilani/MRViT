@@ -14,7 +14,6 @@ train_small_transforms = transforms.Compose([
         transforms.Normalize(mean=[0.5], std=[0.5]),
         transforms.RandomHorizontalFlip(),
         transforms.RandomRotation(10),
-        transforms.Resize(224),
     ])
 
 train_large_transforms = transforms.Compose([
@@ -23,7 +22,6 @@ train_large_transforms = transforms.Compose([
 
 test_small_transforms = transforms.Compose([
     transforms.Normalize(mean=[0.5], std=[0.5]),
-    transforms.Resize(224),
 ])
 
 test_large_transforms = transforms.Compose([
