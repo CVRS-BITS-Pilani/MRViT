@@ -138,7 +138,6 @@ class LeViT(nn.Module):
         dim_key = 32,
         dim_value = 64,
         dropout = 0.,
-        num_distill_classes = None
     ):
         super().__init__()
 
@@ -174,20 +173,11 @@ class LeViT(nn.Module):
             Rearrange('... () () -> ...')
         )
 
-        self.distill_head = nn.Linear(dim, num_distill_classes) if exists(num_distill_classes) else always(None)
         self.mlp_head = nn.Linear(dim, num_classes)
 
     def forward(self, img):
         x = self.conv_embedding(img)
-
         x = self.backbone(x)        
-
         x = self.pool(x)
-
         out = self.mlp_head(x)
-        distill = self.distill_head(x)
-
-        if exists(distill):
-            return out, distill
-
         return out

@@ -9,22 +9,22 @@ class MultiResViT(nn.Module):
     self.nclasses = nclasses
     self.small = LeViT(
                         image_size = 112,
-                        num_classes = 2, # number of classes
+                        num_classes = 1, # number of classes
                         stages = 2,             # number of stages
-                        dim = (256, 512),  # dimensions at each stage
+                        dim = (64, 128),  # dimensions at each stage
                         depth = 2,              # transformer depth
                         heads = (4, 8),      # heads at each stage
-                        mlp_mult = 2,
+                        mlp_mult = 3,
                         dropout = 0.10  # dropout rate
                     )
     self.large = LeViT(
                         image_size = 112,
-                        num_classes = self.nclasses - 2, # number of classes
+                        num_classes = self.nclasses - 1, # number of classes
                         stages = 2,             # number of stages
-                        dim = (256, 512),  # dimensions at each stage
+                        dim = (64, 128),  # dimensions at each stage
                         depth = 2,              # transformer depth
                         heads = (4, 8),      # heads at each stage
-                        mlp_mult = 2,
+                        mlp_mult = 3,
                         dropout = 0.10  # dropout rate
                     )
     self.fc = nn.Linear(self.nclasses, self.nclasses)  # set up FC layer

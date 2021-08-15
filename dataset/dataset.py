@@ -2,13 +2,7 @@ import torch
 import numpy as np
 import torch.utils.data as data
 import h5py
-from medmnist.info import INFO
 import torchvision.transforms as transforms
-
-data_flag = 'retinamnist'
-
-info = INFO[data_flag]
-task = info['task']
 
 train_small_transforms = transforms.Compose([
         transforms.Normalize(mean=[0.5], std=[0.5]),
@@ -30,7 +24,8 @@ test_large_transforms = transforms.Compose([
 
 class MyDataset(data.Dataset):
     """dataset class for returning both small and large images along with labels."""
-    def __init__(self, images_small, images_large, labels, small_transform=None, large_transform=None):
+    def __init__(self, images_small, images_large, labels, small_transform=None, 
+                    large_transform=None):
         self.images_small = images_small
         self.images_large = images_large
         self.labels = labels
@@ -59,7 +54,7 @@ class MyDataset(data.Dataset):
     def get_labels(self): 
         return self.labels.flatten()
 
-def get_datasets():
+def get_datasets(data_flag):
     """retrieving train, validation and test datasets."""
     with h5py.File(f'/content/drive/MyDrive/MRViT/data/{data_flag}_super.h5', 'r') as hf:
         print(hf.keys())
@@ -89,8 +84,11 @@ def get_datasets():
     trains_data = trains[train_ind]
     vals_data = trains[val_ind]
 
-    train_dataset = MyDataset(trains_data, trainl_data, train_label, train_small_transforms, train_small_transforms)
-    valid_dataset = MyDataset(vals_data, vall_data, val_label, test_small_transforms, test_small_transforms)
-    test_dataset = MyDataset(tests_data, testl_data, test_label, test_small_transforms, test_small_transforms)
+    train_dataset = MyDataset(trains_data, trainl_data, train_label, train_small_transforms, 
+                                train_small_transforms)
+    valid_dataset = MyDataset(vals_data, vall_data, val_label, test_small_transforms, 
+                                test_small_transforms)
+    test_dataset = MyDataset(tests_data, testl_data, test_label, test_small_transforms, 
+                                test_small_transforms)
 
     return train_dataset, valid_dataset, test_dataset
